@@ -22,7 +22,7 @@ const searchVideos = async (searchTerm: string) => {
 const SearchPage = () => {
     const { searchQuery } = useParams();
 
-    const [channelRow, setChannelRow] = useState<ChannelRowCardInterface>();
+    const [channelRows, setChannelRows] = useState<ChannelRowCardInterface[]>([]);
     const [videoRows, setVideoRows] = useState<VideoRowCardInterface[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -38,25 +38,30 @@ const SearchPage = () => {
             .catch(console.error);
     }, [searchQuery]);
 
-    const createChannelRow = async (channel: ChannelItem) => {
-        const channelId = channel.id.channelId;
-        const response = await axios
-            .get(`https://www.googleapis.com/youtube/v3/channels?part=statistics&id=${channelId}&key=${process.env.REACT_APP_YOUTUBE_API_KEY}`)
-        const noOfVideos = response.data.items[0].statistics.videoCount;
-        const subs = response.data.items[0].statistics.subscriberCount;
-        const snippet = channel.snippet;
-        const title = snippet.title;
-        const description = snippet.description;
-        const image = snippet.thumbnails.medium.url;
+    const createChannelRow = async (channels: ChannelItem[]) => {
+        const newChannelRows: ChannelRowCardInterface[] = [];
+        for (const channel of channels) {
+            const channelId = channel.id.channelId;
+            const response = await axios
+                .get(`https://www.googleapis.com/youtube/v3/channels?part=statistics&id=${channelId}&key=${process.env.REACT_APP_YOUTUBE_API_KEY}`)
+            const noOfVideos = response.data.items[0].statistics.videoCount;
+            const subs = response.data.items[0].statistics.subscriberCount;
+            const snippet = channel.snippet;
+            const title = snippet.title;
+            const description = snippet.description;
+            const image = snippet.thumbnails.medium.url;
 
-        setChannelRow({
-            channelId,
-            image,
-            title,
-            subs,
-            noOfVideos,
-            description
-        });
+            newChannelRows.push({
+                channelId,
+                image,
+                title,
+                subs,
+                noOfVideos,
+                description
+            })
+        }
+
+        setChannelRows(newChannelRows);
     }
 
     const createVideoRows = async (videos: VideoRowItem[]) => {
@@ -95,15 +100,19 @@ const SearchPage = () => {
             </div>
             {isLoading ? <CircularProgress className='loading' color='secondary'/> : null}
             <hr/>
-            {!isLoading ?
-                <ChannelRow
-                    key={channelRow?.channelId}
-                    image={channelRow?.image}
-                    channel={channelRow?.title}
-                    subs={channelRow?.subs}
-                    noOfVideos={channelRow?.noOfVideos}
-                    description={channelRow?.description}
-                    channelId={channelRow?.channelId} /> : null
+            {
+                channelRows.map(item => {
+                    return (
+                        <ChannelRow
+                            key={item.channelId}
+                            image={item.image}
+                            channel={item.title}
+                            subs={item.subs}
+                            noOfVideos={item.noOfVideos}
+                            description={item.description}
+                            channelId={item.channelId} />
+                    )
+                })
             }
             <hr/>
             {

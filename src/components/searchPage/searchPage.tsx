@@ -8,6 +8,7 @@ import CircularProgress from "@material-ui/core/CircularProgress";
 import ChannelRow from "../channelRow/channelRow";
 import VideoRow from "../videoRow/videoRow";
 import TuneIcon from '@material-ui/icons/Tune';
+import { Link } from "react-router-dom";
 
 const searchChannel = async (searchTerm: string) => {
     return axios
@@ -118,13 +119,15 @@ const SearchPage = () => {
             {
                 videoRows.map(item => {
                     return (
-                        <VideoRow
-                            title={item.title}
-                            image={item.image}
-                            views={item.views}
-                            timestamp={item.timestamp}
-                            channel={item.channel}
-                            description={item.description} />
+                        <Link key={item.videoId} to={`/video/${item.videoId}`}>
+                            <VideoRow
+                                title={item.title}
+                                image={item.image}
+                                views={item.views}
+                                timestamp={item.timestamp}
+                                channel={item.channel}
+                                description={item.description} />
+                        </Link>
                     )
                 })
 

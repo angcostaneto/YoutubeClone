@@ -91,6 +91,7 @@ export interface Statistics {
     likeCount: string
     favoriteCount: string
     commentCount: string
+    dislikeCount?: string
 }
 
 export interface PageInfo {
